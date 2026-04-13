@@ -189,21 +189,18 @@
             <div class="chart-title">📊 Receita Mensal</div>
             <div class="chart-subtitle" id="chart-receita-subtitle">Últimos 12 meses</div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;position:relative">
-            <button id="btn-abrir-cal" onmousedown="event.stopPropagation();toggleCalendario()" style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 14px;color:var(--muted);font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="if(!filtroDataInicio)this.style.borderColor='var(--border)'">
-              <span style="font-size:14px">📅</span>
-              <span id="label-cal">Selecionar período</span>
-            </button>
-            <button onmousedown="event.stopPropagation();limparFiltroData()" id="btn-limpar-mes" style="display:none;background:transparent;border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--muted);font-size:11px;cursor:pointer;transition:all 0.2s" onmouseover="this.style.color='var(--danger)';this.style.borderColor='var(--danger)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border)'">✕</button>
-            <!-- Mini calendário de meses -->
-            <div id="cal-popup" style="display:none;position:absolute;top:calc(100% + 8px);right:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,0.5);min-width:260px">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-                <button onmousedown="event.stopPropagation();calNavAno(-1)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">‹</button>
-                <span id="cal-ano-label" style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text)"></span>
-                <button onmousedown="event.stopPropagation();calNavAno(1)" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px;border-radius:4px" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">›</button>
-              </div>
-              <div id="cal-meses-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"></div>
-              <div id="cal-hint" style="margin-top:10px;font-size:10px;color:var(--muted);text-align:center">Clique para início · Clique novamente para fim</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Mês inicial</label>
+              <select id="filtro-mes-inicio" onchange="aplicarFiltroData()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;color-scheme:dark"><option value="">— Todos</option></select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px">Mês final</label>
+              <select id="filtro-mes-fim" onchange="aplicarFiltroData()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 10px;color:var(--text);font-size:12px;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;color-scheme:dark"><option value="">— Todos</option></select>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <label style="font-size:10px;color:transparent">-</label>
+              <button onclick="limparFiltroData()" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);font-size:12px;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">↺ Limpar</button>
             </div>
           </div>
         </div>
@@ -333,19 +330,8 @@ let filtroDataInicio=null,filtroDataFim=null;
 const temFiltro=()=>Object.values(filtros).some(v=>v);
 
 const COR_FORMA={PIX:'#00d4aa',CARTAO:'#4f8ef7',BOLETO:'#a78bfa'};
-const COR_NIVEL={
-  'COMPLEMENTACAO':'#4f8ef7',
-  'POS-GRADUACAO':  '#00d4aa',
-  'GRADUACAO':      '#f5c842',
-  'CAPACITACAO':    '#ff5c6e',
-  'TAXA':           '#a78bfa',
-  'EJA':            '#fb923c',
-  'TECNICO':        '#38bdf8',
-  'SEM INFORMACAO': '#6b7280'
-};
-// Mantido por compatibilidade com renderRosca no modo simples (vw_receita_nivel já vem ordenada)
-const CORES_NIVEL=Object.values(COR_NIVEL);
-const CORES_INAD=Object.values(COR_NIVEL);
+const CORES_NIVEL=['#4f8ef7','#00d4aa','#f5c842','#ff5c6e','#a78bfa','#fb923c','#38bdf8'];
+const CORES_INAD=['#4f8ef7','#00d4aa','#f5c842','#ff5c6e','#a78bfa','#fb923c','#38bdf8'];
 
 const fmtMoeda=v=>!v&&v!==0?'R$ 0,00':'R$ '+parseFloat(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtNum=v=>parseInt(v||0).toLocaleString('pt-BR');
@@ -813,14 +799,9 @@ function renderBarrasEmpilhadas(meses,mapaForma,formasOrdenadas,inadimplente,can
 function renderRosca(id,labels,values,cores,tipo){
   if(id==='chart-nivel'&&chartNivel)chartNivel.destroy();
   if(id==='chart-inadimplencia'&&chartInadimplencia)chartInadimplencia.destroy();
-  // Usa mapa fixo cor por nível — garante mesma cor nas duas roscas independente da ordem
-  const bgColors=labels.map((lbl,i)=>{
-    const cor=COR_NIVEL[lbl]||(cores[i]||'#6b7280');
-    return filtros[tipo]&&lbl!==filtros[tipo]?cor+'33':cor;
-  });
   const c=new Chart(document.getElementById(id),{
     type:'doughnut',
-    data:{labels,datasets:[{data:values,backgroundColor:bgColors,borderColor:'#181c27',borderWidth:3,hoverBorderWidth:0,hoverOffset:10}]},
+    data:{labels,datasets:[{data:values,backgroundColor:cores.map((cor,i)=>filtros[tipo]&&labels[i]!==filtros[tipo]?cor+'33':cor),borderColor:'#181c27',borderWidth:3,hoverBorderWidth:0,hoverOffset:10}]},
     options:{
       responsive:true,cutout:'60%',
       plugins:{
@@ -847,139 +828,41 @@ function rankItem(i,nome,val,max,cor,tipo){
 
 
 
-// ── Calendário de meses ─────────────────────────────────────────────────
-// ── Calendário de meses ─────────────────────────────────────────────────
-let _mesesDisponiveis=[];
-let _calAno=new Date().getFullYear();
-let _calFase=0; // 0=aguardando início, 1=aguardando fim
-
-function popularMesGrid(meses){
-  _mesesDisponiveis=meses.map(m=>{const[mm,yyyy]=m.split('/');return `${yyyy}-${mm}`;});
-  if(_mesesDisponiveis.length>0)
-    _calAno=parseInt(_mesesDisponiveis[_mesesDisponiveis.length-1].split('-')[0]);
-  renderCalendario();
-}
-
-function renderCalendario(){
-  const ABREV=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  document.getElementById('cal-ano-label').textContent=_calAno;
-  const grid=document.getElementById('cal-meses-grid');
-  grid.innerHTML='';
-  ABREV.forEach((ab,i)=>{
-    const mm=String(i+1).padStart(2,'0');
-    const ym=`${_calAno}-${mm}`;
-    const disponivel=_mesesDisponiveis.includes(ym);
-    const ini=filtroDataInicio, fim=filtroDataFim;
-    const eSel=ini&&fim&&ym>=ini&&ym<=fim;
-    const eIni=ym===ini, eFim=ym===fim;
-    let bg='transparent',border='var(--border)',color=disponivel?'var(--text)':'var(--muted)',fw='400';
-    if(eSel){bg='rgba(79,142,247,0.2)';border='var(--accent)';color='var(--accent)';fw='600';}
-    if(eIni||eFim){bg='var(--accent)';border='var(--accent)';color='white';fw='700';}
-    const btn=document.createElement('button');
-    btn.textContent=ab;
-    btn.style.cssText=`background:${bg};border:1px solid ${border};border-radius:7px;padding:7px 4px;color:${color};font-size:12px;font-family:'Syne',sans-serif;font-weight:${fw};cursor:${disponivel?'pointer':'default'};transition:all 0.15s;opacity:${disponivel?'1':'0.35'};`;
-    if(disponivel){
-      btn.addEventListener('mousedown',function(e){
-        e.stopPropagation();
-        selMes(ym);
-      });
-    }
-    grid.appendChild(btn);
+function popularSelectsMes(meses){
+  const toYYYYMM=m=>{const[mm,yyyy]=m.split('/');return `${yyyy}-${mm}`;};
+  const opts='<option value="">— Todos</option>'+meses.map(m=>`<option value="${toYYYYMM(m)}">${m}</option>`).join('');
+  ['filtro-mes-inicio','filtro-mes-fim'].forEach(id=>{
+    const el=document.getElementById(id);
+    const valAtual=el.value;
+    el.innerHTML=opts;
+    if(valAtual)el.value=valAtual;
   });
-  const hint=document.getElementById('cal-hint');
-  if(_calFase===1) hint.textContent='Agora clique no mês final';
-  else if(filtroDataInicio&&filtroDataFim) hint.textContent='Período selecionado — clique para redefinir';
-  else hint.textContent='Clique no mês inicial';
 }
 
-function selMes(ym){
-  if(_calFase===0){
-    _calFase=1;
-    filtroDataInicio=ym;
-    filtroDataFim=ym;
-    renderCalendario();
-  } else {
-    _calFase=0;
-    const a=filtroDataInicio, b=ym;
-    filtroDataInicio=a<b?a:b;
-    filtroDataFim=a<b?b:a;
-    renderCalendario();
-    fecharCalendario();
-    aplicarPeriodoSelecionado();
-  }
-}
-
-function aplicarPeriodoSelecionado(){
-  const ABREV=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-  const fmtL=ym=>{const[y,m]=ym.split('-');return `${ABREV[parseInt(m)-1]}/${y.slice(2)}`;};
+function aplicarFiltroData(){
+  const ini=document.getElementById('filtro-mes-inicio').value;
+  const fim=document.getElementById('filtro-mes-fim').value;
+  filtroDataInicio=ini||null;
+  filtroDataFim=fim||null;
+  // atualizar subtitle
   const sub=document.getElementById('chart-receita-subtitle');
-  sub.textContent=filtroDataInicio===filtroDataFim?fmtL(filtroDataInicio):`${fmtL(filtroDataInicio)} → ${fmtL(filtroDataFim)}`;
-  document.getElementById('label-cal').textContent=sub.textContent;
-  const btn=document.getElementById('btn-abrir-cal');
-  btn.style.borderColor='var(--accent)';btn.style.color='var(--accent)';
-  document.getElementById('btn-limpar-mes').style.display='block';
+  if(ini||fim) sub.textContent=(ini?fmtMesYYYYMM(ini):'início')+' → '+(fim?fmtMesYYYYMM(fim):'hoje');
+  else sub.textContent='Últimos 12 meses';
   if(temFiltro()||filtroDataInicio||filtroDataFim)carregarComFiltro();else carregarInicial();
 }
 
-function calNavAno(delta){
-  _calAno+=delta;
-  renderCalendario();
-}
-
-function fecharCalendario(){
-  document.getElementById('cal-popup').style.display='none';
-  if(_fecharForaFn){
-    document.removeEventListener('mousedown',_fecharForaFn);
-    _fecharForaFn=null;
-  }
-}
-
-let _fecharForaFn=null;
-
-function toggleCalendario(){
-  const p=document.getElementById('cal-popup');
-  if(p.style.display==='none'){
-    p.style.display='block';
-    renderCalendario();
-    // Adiciona listener de fechar fora SÓ agora, com delay para não capturar o clique atual
-    setTimeout(()=>{
-      _fecharForaFn=function(e){
-        const popup=document.getElementById('cal-popup');
-        const btnAbrir=document.getElementById('btn-abrir-cal');
-        if(popup.contains(e.target)||btnAbrir.contains(e.target))return;
-        fecharCalendario();
-        if(_calFase===1){_calFase=0;filtroDataInicio=null;filtroDataFim=null;}
-        document.removeEventListener('mousedown',_fecharForaFn);
-        _fecharForaFn=null;
-      };
-      document.addEventListener('mousedown',_fecharForaFn);
-    },200);
-  } else {
-    fecharCalendario();
-    if(_calFase===1){_calFase=0;filtroDataInicio=null;filtroDataFim=null;}
-  }
-}
-
-// Listener de fechar fora — adicionado dinamicamente só quando popup abre
-
-function popularSelectsMes(meses){popularMesGrid(meses);}
-function aplicarFiltroData(){}
-
 function limparFiltroData(){
-  _calFase=0;
+  document.getElementById('filtro-mes-inicio').value='';
+  document.getElementById('filtro-mes-fim').value='';
   filtroDataInicio=null;filtroDataFim=null;
   document.getElementById('chart-receita-subtitle').textContent='Últimos 12 meses';
-  document.getElementById('label-cal').textContent='Selecionar período';
-  const btn=document.getElementById('btn-abrir-cal');
-  btn.style.borderColor='var(--border)';btn.style.color='var(--muted)';
-  document.getElementById('btn-limpar-mes').style.display='none';
-  renderCalendario();
   if(temFiltro())carregarComFiltro();else carregarInicial();
 }
 
 function fmtMesYYYYMM(yyyymm){
   if(!yyyymm)return '';
-  const[yyyy,mm]=yyyymm.split('-');return `${mm}/${yyyy}`;
+  const[yyyy,mm]=yyyymm.split('-');
+  return `${mm}/${yyyy}`;
 }
 
 function dentroDoFiltroData(d){
@@ -991,7 +874,6 @@ function dentroDoFiltroData(d){
   if(filtroDataFim&&anoMes>filtroDataFim)return false;
   return true;
 }
-
 
 function toggleFiltro(tipo,valor){
   filtros[tipo]=filtros[tipo]===valor?null:valor;
